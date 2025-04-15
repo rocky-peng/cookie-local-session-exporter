@@ -33,7 +33,7 @@ const exportStorage = async (type) => {
         if (!data) throw new Error('无数据');
         downloadJSON(
             { [type]: data, url, timestamp },
-            `storage_${type}_${new Date(timestamp).toISOString().slice(0, 10)}.json`
+            `${type}_storage_${new Date(timestamp).toISOString().slice(0, 10)}.json`
         );
 
     } catch (error) {
@@ -73,7 +73,53 @@ const exportCookies = async () => {
     }
 };
 
+// 终极奥义：同时扒三层裤子
+const exportAllStorage = async () => {
+    try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+        // 同时扒取 localStorage 和 sessionStorage
+        const storageResult = await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => ({
+                local: Object.fromEntries(Object.entries(localStorage)),
+                session: Object.fromEntries(Object.entries(sessionStorage)),
+                url: location.href
+            })
+        });
+
+        // 单独扒 Cookie 的裤子
+        const cookies = await chrome.cookies.getAll({ url: tab.url });
+
+        // 组装成超级大裤衩
+        const allData = {
+            localStorage: storageResult[0].result.local,
+            sessionStorage: storageResult[0].result.session,
+            cookies: cookies.map(cookie => ({
+                name: cookie.name,
+                value: cookie.value,
+                domain: cookie.domain,
+                path: cookie.path,
+                expires: cookie.expirationDate,
+                secure: cookie.secure
+            })),
+            timestamp: new Date().toISOString(),
+            url: storageResult[0].result.url
+        };
+
+        // 给大裤衩拍个X光片
+        downloadJSON(
+            allData,
+            `all_storage_${Date.now()}.json`
+        );
+
+    } catch (error) {
+        alert(`扒裤失败！原因：${error.message}`);
+    }
+};
+
 // 绑定所有按钮事件
 document.getElementById('exportLocal').addEventListener('click', () => exportStorage('local'));
 document.getElementById('exportSession').addEventListener('click', () => exportStorage('session'));
 document.getElementById('exportCookie').addEventListener('click', exportCookies); // 新增绑定
+document.getElementById('exportAll').addEventListener('click', exportAllStorage);

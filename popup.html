@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            width: 200px;
+            padding: 10px;
+        }
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        button {
+            padding: 12px;
+            background: #0078d4;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        #exportLocal {
+            background: #0078d4; /* 蓝色表示本地存储 */
+        }
+        #exportSession {
+            background: #28a745; /* 绿色表示会话存储 */
+        }
+        #exportCookie {
+            background: #ff6b35; /* 橙色表示 Cookie */
+        }
+    </style>
+</head>
+<body>
+<div class="btn-group">
+    <button id="exportCookie">导出 Cookies</button>
+    <button id="exportLocal">导出 localStorage</button>
+    <button id="exportSession">导出 sessionStorage</button>
+</div>
+<script src="popup.js"></script>
+</body>
+</html>
